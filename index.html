@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patient Signals Demo — Command Center</title>
+<meta name="description" content="Patient Signals demo — Life Sciences Cloud Command Center prototype">
+<style>
+  :root{
+    --cc-bg:#f3f3f3; --cc-surface:#ffffff; --cc-surface-2:#f7f8fa; --cc-surface-3:#ebedf1;
+    --cc-border:#e5e5e5; --cc-ink:#2e2e2e; --cc-ink-strong:#03234d; --cc-muted:#5c5c5c;
+    --cc-accent:#066afe; --cc-accent-2:#0250d9; --cc-info-bg:#d8e6fe;
+    --cc-error:#ba0517; --cc-error-2:#b60554; --cc-error-bg:#fef1ee;
+    --cc-success:#2e844a; --cc-success-bg:#eaf5ee;
+    --cc-warning:#8a641e; --cc-warning-bg:#fdf3e0;
+    --cc-tab-bg:linear-gradient(180deg,#eef5ff 0%,#e6f0ff 100%); --cc-tab-border:#b7d0f5; --cc-tab-ink:#0b2e6b;
+    --cc-tab-active:linear-gradient(180deg,#2f6fcc 0%,#245bb3 100%); --cc-tab-active-border:#245bb3;
+    --cc-storybar-bg:linear-gradient(180deg,#f7fbff 0%,#eef5ff 100%); --cc-storybar-border:#b7d0f5;
+    --cc-navy-card:#0e1a2b; --cc-navy-card-ink:#eef2f7; --cc-navy-card-accent:#8bd3ff;
+    --cc-radius-lg:20px; --cc-radius-md:12px; --cc-radius-sm:8px;
+    --cc-shadow:0 1px 3px rgba(3,35,77,.08);
+    --cc-navrail-bg:#ffffff;
+    --ring-elena:#7b5cd6; --ring-jordan:#0b827c; --ring-team:#c97900;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --cc-bg:#0b1626; --cc-surface:#101d30; --cc-surface-2:#0e1a2b; --cc-surface-3:#16263c;
+      --cc-border:#233247; --cc-ink:#eef2f7; --cc-ink-strong:#eaf3ff; --cc-muted:#9fb0c3;
+      --cc-accent:#5aa7ff; --cc-accent-2:#8bd3ff; --cc-info-bg:#173a63;
+      --cc-error:#ff7a7a; --cc-error-2:#ff8fb3; --cc-error-bg:#3a1414;
+      --cc-success:#57c485; --cc-success-bg:#0f2c1d;
+      --cc-warning:#f0b25b; --cc-warning-bg:#2c2107;
+      --cc-tab-bg:linear-gradient(180deg,#132743 0%,#0f2038 100%); --cc-tab-border:#2a4770; --cc-tab-ink:#bcd8ff;
+      --cc-tab-active:linear-gradient(180deg,#2f6fcc 0%,#245bb3 100%); --cc-tab-active-border:#3d7fe0;
+      --cc-storybar-bg:linear-gradient(180deg,#0f1c30 0%,#0b1626 100%); --cc-storybar-border:#233247;
+      --cc-navy-card:#050c17; --cc-navy-card-ink:#eef2f7; --cc-navy-card-accent:#8bd3ff;
+      --cc-shadow:0 1px 3px rgba(0,0,0,.5); --cc-navrail-bg:#101d30;
+    }
+  }
+  :root[data-theme="dark"]{
+    --cc-bg:#0b1626; --cc-surface:#101d30; --cc-surface-2:#0e1a2b; --cc-surface-3:#16263c;
+    --cc-border:#233247; --cc-ink:#eef2f7; --cc-ink-strong:#eaf3ff; --cc-muted:#9fb0c3;
+    --cc-accent:#5aa7ff; --cc-accent-2:#8bd3ff; --cc-info-bg:#173a63;
+    --cc-error:#ff7a7a; --cc-error-2:#ff8fb3; --cc-error-bg:#3a1414;
+    --cc-success:#57c485; --cc-success-bg:#0f2c1d;
+    --cc-warning:#f0b25b; --cc-warning-bg:#2c2107;
+    --cc-tab-bg:linear-gradient(180deg,#132743 0%,#0f2038 100%); --cc-tab-border:#2a4770; --cc-tab-ink:#bcd8ff;
+    --cc-tab-active:linear-gradient(180deg,#2f6fcc 0%,#245bb3 100%); --cc-tab-active-border:#3d7fe0;
+    --cc-storybar-bg:linear-gradient(180deg,#0f1c30 0%,#0b1626 100%); --cc-storybar-border:#233247;
+    --cc-navy-card:#050c17; --cc-navy-card-ink:#eef2f7; --cc-navy-card-accent:#8bd3ff;
+    --cc-shadow:0 1px 3px rgba(0,0,0,.5); --cc-navrail-bg:#101d30;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--cc-bg); color:var(--cc-ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+
+  /* ============== GLOBAL HEADER ============== */
+  .cc-header{
+    position:sticky; top:0; z-index:30;
+    height:52px; background:var(--cc-surface); border-bottom:1px solid var(--cc-border);
+    display:flex; align-items:center; gap:14px; padding:0 16px;
+  }
+  .cc-waffle{
+    width:32px; height:32px; border-radius:8px; border:none; background:transparent; cursor:pointer;
+    display:grid; grid-template-columns:repeat(3,4px); grid-template-rows:repeat(3,4px); gap:2.5px; place-items:center;
+    flex:0 0 auto;
+  }
+  .cc-waffle span{width:4px; height:4px; border-radius:1px; background:var(--cc-muted)}
+  .cc-waffle:hover{background:var(--cc-surface-3)}
+  .cc-appswitch{display:flex; align-items:center; gap:6px; flex:0 0 auto; white-space:nowrap}
+  .cc-appswitch .name{font-size:14px; font-weight:700; color:var(--cc-ink-strong)}
+  .cc-appswitch .caret{font-size:9px; color:var(--cc-muted)}
+  .cc-hdiv{width:1px; height:22px; background:var(--cc-border); flex:0 0 auto}
+  .cc-brandline{display:flex; flex-direction:column; line-height:1.15; flex:0 0 auto; white-space:nowrap}
+  .cc-brandline .b1{font-size:12.5px; font-weight:700; color:var(--cc-ink)}
+  .cc-brandline .b2{font-size:10.5px; color:var(--cc-muted)}
+  .cc-search{
+    flex:1 1 auto; max-width:420px; display:flex; align-items:center; gap:8px;
+    background:var(--cc-surface-2); border:1px solid var(--cc-border); border-radius:999px;
+    padding:7px 14px; color:var(--cc-muted); font-size:12.5px;
+  }
+  .cc-search svg{flex:0 0 auto; opacity:.7}
+  .cc-header-right{display:flex; align-items:center; gap:6px; margin-left:auto; flex:0 0 auto}
+  .cc-icobtn{
+    width:32px; height:32px; border-radius:8px; border:none; background:transparent; color:var(--cc-muted);
+    display:grid; place-items:center; cursor:pointer; position:relative;
+  }
+  .cc-icobtn:hover{background:var(--cc-surface-3)}
+  .cc-icobtn .dot{position:absolute; top:6px; right:6px; width:6px; height:6px; border-radius:50%; background:var(--cc-error)}
+  .cc-user{display:flex; align-items:center; gap:8px; padding-left:6px; cursor:pointer}
+  .cc-user .av{
+    width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--ring-elena),#a68af0);
+    color:#fff; display:grid; place-items:center; font-size:11px; font-weight:700; flex:0 0 auto;
+  }
+  .cc-user .nm{font-size:12.5px; font-weight:600; color:var(--cc-ink); white-space:nowrap}
+  .cc-user .rl{font-size:10.5px; color:var(--cc-muted); white-space:nowrap}
+
+  /* ============== STORY TAB BAR ============== */
+  .cc-storybar{
+    position:sticky; top:52px; z-index:25;
+    background:var(--cc-storybar-bg); border-bottom:1px solid var(--cc-storybar-border);
+    padding:10px 16px;
+  }
+  .cc-storybar-scroll{display:flex; align-items:center; gap:8px; overflow-x:auto; scrollbar-width:none}
+  .cc-storybar-scroll::-webkit-scrollbar{display:none}
+  .story-tab{
+    appearance:none; border:1px solid var(--cc-tab-border); background:var(--cc-tab-bg); border-radius:12px;
+    color:var(--cc-tab-ink); display:inline-flex; align-items:center; gap:8px; flex:0 0 auto;
+    padding:5px 12px 5px 7px; cursor:pointer; font-family:inherit; min-height:40px; white-space:nowrap;
+    transition:border-color .12s ease, background-color .12s ease;
+  }
+  .story-tab:hover{border-color:#7ea6e8; filter:brightness(1.02)}
+  .story-tab .st-av{
+    width:22px; height:22px; border-radius:50%; flex:0 0 auto; display:grid; place-items:center;
+    font-size:8.5px; font-weight:800; color:#fff; box-shadow:0 0 0 3px rgba(255,255,255,.55);
+  }
+  .story-tab .st-av.p-elena{background:var(--ring-elena)}
+  .story-tab .st-av.p-jordan{background:var(--ring-jordan)}
+  .story-tab .st-av.p-team{background:var(--ring-team)}
+  .story-tab .st-body{display:flex; flex-direction:column; align-items:flex-start; gap:1px}
+  .story-tab .st-index{font-size:9px; font-weight:800; letter-spacing:.06em; color:#3d5f95; text-transform:uppercase}
+  .story-tab .st-persona{font-size:11px; font-weight:700; line-height:1.1}
+  .story-tab .st-headline{font-size:10.5px; font-weight:500; line-height:1.1; opacity:.9}
+  .story-tab.active{background:var(--cc-tab-active); border-color:var(--cc-tab-active-border); color:#fff}
+  .story-tab.active .st-index{color:rgba(255,255,255,.85)}
+  .story-tab.active .st-av{box-shadow:0 0 0 3px rgba(255,255,255,.85)}
+
+  /* ============== SHELL / NAV RAIL ============== */
+  .cc-shell{display:flex; min-height:calc(100vh - 52px - 61px)}
+  .cc-navrail{
+    width:52px; flex:0 0 auto; background:var(--cc-navrail-bg); border-right:1px solid var(--cc-border);
+    display:flex; flex-direction:column; align-items:center; gap:4px; padding:14px 0;
+  }
+  .cc-navicon{
+    width:34px; height:34px; border-radius:8px; display:grid; place-items:center; color:var(--cc-muted); flex:0 0 auto;
+  }
+  .cc-navicon.on{background:var(--cc-info-bg); color:var(--cc-accent)}
+  .cc-main{flex:1 1 auto; min-width:0; padding:26px 28px 64px}
+  .cc-maininner{max-width:1180px; margin:0 auto}
+
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* ============== PAGE HEAD ============== */
+  .cc-pagehead{display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:16px; flex-wrap:wrap}
+  .cc-pagehead .crumb{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--cc-accent); margin-bottom:4px}
+  .cc-pagehead h1{font-size:20px; font-weight:700; margin:0 0 4px; color:var(--cc-ink-strong); letter-spacing:-.01em}
+  .cc-pagehead .intent{font-size:13px; color:var(--cc-muted); margin:4px 0 0; max-width:640px; line-height:1.5}
+
+  /* ============== CARD / FRAME SHELL ============== */
+  .cc-frame{background:var(--cc-surface); border:1px solid var(--cc-border); border-radius:var(--cc-radius-lg); box-shadow:var(--cc-shadow); overflow:hidden}
+  .cc-titlerow{
+    height:56px; display:flex; align-items:center; gap:12px; padding:0 20px;
+    border-bottom:1px solid var(--cc-border); flex-wrap:wrap;
+  }
+  .cc-titlerow .crumbs{font-size:12px; color:var(--cc-muted)}
+  .cc-titlerow .crumbs b{color:var(--cc-ink); font-weight:700}
+  .cc-titlerow .tag{margin-left:auto; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--cc-accent); background:var(--cc-info-bg); padding:4px 9px; border-radius:999px; white-space:nowrap}
+  .cc-body{padding:20px}
+  .panel-title{font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--cc-muted); margin:18px 0 10px}
+  .panel-title:first-child{margin-top:0}
+
+  .callout{background:var(--cc-info-bg); border-radius:var(--cc-radius-md); padding:13px 16px; font-size:12.5px; line-height:1.55; color:var(--cc-ink-strong)}
+  .callout.warn{background:var(--cc-warning-bg); color:var(--cc-warning)}
+  .callout b{color:var(--cc-accent-2)}
+  .callout.warn b{color:var(--cc-warning)}
+
+  /* ============== KPI TILES ============== */
+  .kpi-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+  .kpi-tile{background:var(--cc-surface-2); border:1px solid var(--cc-border); border-radius:16px; padding:14px 16px; display:flex; flex-direction:column; gap:4px}
+  .kpi-tile .kv{font-size:28px; font-weight:400; color:var(--cc-ink); font-variant-numeric:tabular-nums; line-height:1.1}
+  .kpi-tile .kv.risk{color:var(--cc-error)}
+  .kpi-tile .kv.good{color:var(--cc-success)}
+  .kpi-tile .kl{font-size:11.5px; color:var(--cc-muted)}
+
+  /* ============== DECISION PACKET ============== */
+  .packet{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .pcard{border:1px solid var(--cc-border); border-radius:16px; padding:14px 16px; background:var(--cc-surface)}
+  .pcard.owner{grid-column:1/-1; background:var(--cc-info-bg); border-color:transparent}
+  .pcard .role{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--cc-muted); margin-bottom:4px}
+  .pcard.owner .role{color:var(--cc-accent-2)}
+  .pcard .who{font-weight:700; font-size:15px; color:var(--cc-ink-strong)}
+  .pcard .desc{font-size:12.5px; color:var(--cc-muted); margin-top:4px; line-height:1.45}
+
+  /* ============== ACTION TRACKER ============== */
+  .actionlist{display:flex; flex-direction:column; gap:8px}
+  .action{display:grid; grid-template-columns:160px 1fr auto; gap:12px; align-items:center; border:1px solid var(--cc-border); border-radius:14px; padding:12px 14px; background:var(--cc-surface)}
+  .action .who{font-weight:700; font-size:13px; color:var(--cc-ink-strong)}
+  .action .who small{display:block; font-weight:400; color:var(--cc-muted); font-size:10.5px; margin-top:2px}
+  .action .desc{font-size:12.5px; color:var(--cc-ink)}
+  .status{font-size:11px; font-weight:700; padding:4px 11px; border-radius:999px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap}
+  .status:before{content:""; width:6px; height:6px; border-radius:50%}
+  .status.open{background:var(--cc-surface-3); color:var(--cc-muted)}.status.open:before{background:var(--cc-muted)}
+  .status.progress{background:var(--cc-info-bg); color:var(--cc-accent-2)}.status.progress:before{background:var(--cc-accent)}
+  .status.closed{background:var(--cc-success-bg); color:var(--cc-success)}.status.closed:before{background:var(--cc-success)}
+
+  /* ============== LEARN CARDS ============== */
+  .learngrid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+  .learncard{border:1px solid var(--cc-border); border-radius:16px; padding:14px 16px; background:var(--cc-surface-2)}
+  .learncard .kicker{font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--cc-accent); margin-bottom:6px}
+  .learncard .title{font-weight:700; font-size:14px; margin-bottom:6px; color:var(--cc-ink-strong)}
+  .learncard p{margin:0; font-size:12.5px; color:var(--cc-muted); line-height:1.45}
+
+  /* ============== NARRATIVE / CAPTION BLOCKS ============== */
+  .narrbox{margin-top:14px; padding:16px 18px; background:var(--cc-surface); border:1px solid var(--cc-border); border-radius:var(--cc-radius-lg)}
+  .narrbox .lab{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--cc-muted); margin-bottom:8px}
+  .narrbox p{margin:0 0 10px; font-size:14px; line-height:1.6; color:var(--cc-ink)}
+  .narrbox p:last-child{margin-bottom:0}
+  .narrbox b{color:var(--cc-accent-2)}
+
+  .caption{
+    display:flex; gap:14px; margin-top:14px; padding:14px 16px; background:var(--cc-surface-2);
+    border:1px solid var(--cc-border); border-radius:var(--cc-radius-lg); align-items:flex-start; flex-wrap:wrap;
+  }
+  .caption .lab{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--cc-muted); flex:0 0 130px}
+  .caption p{margin:0; font-size:13px; line-height:1.5; color:var(--cc-ink); flex:1 1 320px}
+  .caption p b{color:var(--cc-ink-strong)}
+
+  .sfchips{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+  .sfchip{font-size:10.5px; font-weight:700; color:var(--cc-accent-2); background:var(--cc-info-bg); padding:5px 11px; border-radius:999px}
+  .sfchip.vendor{color:var(--cc-ink); background:var(--cc-surface); border:1px solid var(--cc-border)}
+
+  /* ============== SLACK MOCK (kept faithful to Slack's own UI) ============== */
+  .slack{display:flex; height:520px; background:#fff; font-family:"Segoe UI",system-ui,-apple-system,sans-serif; color:#1d1c1d}
+  .slack-side{width:220px; background:#3f0e40; color:#fff; flex:0 0 auto; padding:14px 0; overflow:hidden}
+  .slack-ws{padding:0 16px 14px; font-weight:800; font-size:15px; border-bottom:1px solid #522653; margin-bottom:10px}
+  .slack-sec{padding:6px 16px; font-size:11px; color:#c3a6c9; text-transform:uppercase; letter-spacing:.04em; margin-top:8px}
+  .slack-ch{padding:6px 16px; font-size:14px; color:#d4b8d8; display:flex; align-items:center; gap:8px}
+  .slack-ch.active{background:#1164a3; color:#fff; border-radius:0}
+  .slack-main{flex:1 1 auto; display:flex; flex-direction:column; min-width:0}
+  .slack-head{padding:12px 20px; border-bottom:1px solid #e8e8e8; font-weight:800; font-size:15px; display:flex; align-items:center; gap:8px}
+  .slack-head .hash{color:#616061; font-weight:400}
+  .slack-body{flex:1 1 auto; padding:18px 22px; overflow-y:auto}
+  .msg{display:flex; gap:12px; margin-bottom:18px}
+  .avatar{width:38px; height:38px; border-radius:8px; flex:0 0 auto; display:grid; place-items:center; font-weight:800; font-size:13px; color:#fff}
+  .avatar.bot{background:#0176d3}
+  .avatar.bot2{background:#2e844a}
+  .msg-body{min-width:0; flex:1 1 auto}
+  .msg-name{font-weight:800; font-size:14px}
+  .msg-name .botpill{font-size:9px; background:#e8e8e8; color:#616061; padding:1px 5px; border-radius:3px; margin-left:6px; font-weight:700; vertical-align:1px}
+  .msg-time{font-size:11px; color:#8a8a8a; font-weight:400; margin-left:6px}
+  .msg-text{font-size:14px; line-height:1.5; margin-top:2px}
+  .card{border:1px solid #e0e0e0; border-left:4px solid #0176d3; border-radius:6px; padding:14px 16px; margin-top:8px; max-width:560px; background:#fafbfc}
+  .card.danger{border-left-color:#ba0517}
+  .card.ok{border-left-color:#2e844a}
+  .card h4{margin:0 0 8px; font-size:15px; color:#111}
+  .stat-row{display:flex; gap:16px; margin:10px 0; flex-wrap:wrap}
+  .stat{min-width:96px}
+  .stat b{display:block; font-size:19px; color:#ba0517; font-variant-numeric:tabular-nums}
+  .stat.good b{color:#2e844a}
+  .stat.neutral b{color:#111}
+  .stat span{font-size:11px; color:#616061}
+  .btn{display:inline-block; margin-top:10px; background:#0176d3; color:#fff; font-weight:700; font-size:12.5px; padding:7px 14px; border-radius:5px; text-decoration:none}
+  .minibadge{display:inline-flex; align-items:center; gap:5px; font-size:11px; color:#616061; background:#f0f2f5; padding:3px 8px; border-radius:10px; margin-top:10px}
+  .minibadge:before{content:"🔒"; font-size:10px}
+
+  /* ============== PROVOCATION (spotlight card) ============== */
+  .provo-card{background:var(--cc-navy-card); color:var(--cc-navy-card-ink); border-radius:var(--cc-radius-lg); padding:28px 30px}
+  .provo-card p{margin:0 0 14px; font-size:16px; line-height:1.6}
+  .provo-card p:last-child{margin-bottom:0}
+  .provo-card b{color:var(--cc-navy-card-accent)}
+  .beatgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px}
+  .beat{border:1px solid var(--cc-border); border-radius:16px; padding:14px; background:var(--cc-surface-2)}
+  .beat .bn{display:inline-grid; place-items:center; width:22px; height:22px; border-radius:6px; background:var(--cc-info-bg); color:var(--cc-accent-2); font-size:11px; font-weight:800; margin-bottom:6px}
+  .beat strong{display:block; font-size:12.5px; margin-bottom:3px; color:var(--cc-ink-strong)}
+  .beat p{margin:0; font-size:11.5px; color:var(--cc-muted); line-height:1.4}
+  .persona-row{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-top:16px}
+  .pfield{background:var(--cc-surface-2); border:1px solid var(--cc-border); border-radius:14px; padding:11px 13px}
+  .pfield .k{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--cc-muted); margin-bottom:3px}
+  .pfield .v{font-size:12.5px; font-weight:700; color:var(--cc-ink-strong)}
+  .evidence-note{margin-top:14px; padding:12px 14px; border-left:4px solid var(--cc-accent); background:var(--cc-info-bg); font-size:12.5px; line-height:1.5; border-radius:0 14px 14px 0; color:var(--cc-ink-strong)}
+
+  /* ============== VALIDATION ============== */
+  .valgrid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .valcard{border:1px solid var(--cc-border); border-radius:var(--cc-radius-lg); padding:16px; background:var(--cc-surface)}
+  .valcard h3{margin:0 0 6px; font-size:14.5px; color:var(--cc-ink-strong)}
+  .valcard p{margin:0; font-size:12.5px; color:var(--cc-muted); line-height:1.5}
+  .archstrip{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:22px}
+  .archcard{border-radius:var(--cc-radius-lg); padding:16px; background:var(--cc-navy-card); color:#e6e3dc}
+  .archcard .k{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--cc-navy-card-accent); margin-bottom:6px}
+  .archcard h4{margin:0 0 6px; font-size:14px; color:#fff}
+  .archcard p{margin:0; font-size:12px; color:#c9c6be; line-height:1.5}
+  .handoff{margin-top:14px; border:1px solid var(--cc-border); border-radius:var(--cc-radius-lg); overflow:hidden}
+  .hrow{display:grid; grid-template-columns:.9fr 1fr 1.4fr 1.4fr; font-size:12px}
+  .hrow>div{padding:11px 14px; border-bottom:1px solid var(--cc-border); border-right:1px solid var(--cc-border)}
+  .hrow>div:last-child{border-right:none}
+  .hrow.head{background:var(--cc-surface-2); color:var(--cc-muted); font-weight:800; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em}
+  .hrow:last-child>div{border-bottom:none}
+
+  .foot{margin-top:34px; text-align:center; font-size:11px; color:var(--cc-muted)}
+
+  @media(max-width:900px){
+    .cc-navrail{display:none}
+    .kpi-grid,.packet,.learngrid,.beatgrid,.persona-row,.valgrid,.archstrip{grid-template-columns:1fr}
+    .action{grid-template-columns:1fr}
+    .hrow{grid-template-columns:1fr}
+    .hrow>div{border-right:none}
+    .cc-search{display:none}
+  }
+</style>
+</head>
+<body>
+<!-- ============== GLOBAL HEADER ============== -->
+<header class="cc-header">
+  <button class="cc-waffle" aria-label="App launcher" onclick="return false"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></button>
+  <div class="cc-appswitch"><span class="name">Launch Command Center</span><span class="caret">▾</span></div>
+  <div class="cc-hdiv"></div>
+  <div class="cc-brandline"><span class="b1">Makana Pharmaceuticals</span><span class="b2">Immunexis · US Launch</span></div>
+  <div class="cc-search">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Search patients, cohorts, cases…
+  </div>
+  <div class="cc-header-right">
+    <button class="cc-icobtn" aria-label="Notifications" onclick="return false">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="dot"></span>
+    </button>
+    <button class="cc-icobtn" aria-label="Help" onclick="return false">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
+    </button>
+    <button class="cc-icobtn" aria-label="Settings" onclick="return false">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+    <div class="cc-user">
+      <div class="av">EM</div>
+      <div>
+        <div class="nm">Elena Martinez</div>
+        <div class="rl">US Launch Operations Lead</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============== STORY TAB BAR ============== -->
+<nav class="cc-storybar" role="tablist" aria-label="Demo screens">
+  <div class="cc-storybar-scroll">
+    <button class="story-tab" role="tab" data-tab="detect">
+      <span class="st-av p-elena">EM</span>
+      <span class="st-body"><span class="st-index">01 · Detect</span><span class="st-persona">Elena Martinez</span><span class="st-headline">A signal in Slack</span></span>
+    </button>
+    <button class="story-tab" role="tab" data-tab="understand">
+      <span class="st-av p-elena">EM</span>
+      <span class="st-body"><span class="st-index">02 · Understand</span><span class="st-persona">Elena Martinez</span><span class="st-headline">Tests a hypothesis</span></span>
+    </button>
+    <button class="story-tab" role="tab" data-tab="route">
+      <span class="st-av p-jordan">JL</span>
+      <span class="st-body"><span class="st-index">03 · Route</span><span class="st-persona">Jordan Lee</span><span class="st-headline">Owns the decision</span></span>
+    </button>
+    <button class="story-tab" role="tab" data-tab="resolve">
+      <span class="st-av p-team">JMC</span>
+      <span class="st-body"><span class="st-index">04 · Resolve</span><span class="st-persona">Jordan · Maya · Chris</span><span class="st-headline">Coordinate the fix</span></span>
+    </button>
+    <button class="story-tab" role="tab" data-tab="verify">
+      <span class="st-av p-elena">EM</span>
+      <span class="st-body"><span class="st-index">05 · Verify</span><span class="st-persona">Elena Martinez</span><span class="st-headline">Confirms recovery</span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="cc-shell">
+  <!-- ============== LEFT ICON RAIL ============== -->
+  <div class="cc-navrail" aria-hidden="true">
+    <div class="cc-navicon on"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+    <div class="cc-navicon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+    <div class="cc-navicon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+    <div class="cc-navicon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.1-2.8-2.8L7 14"/></svg></div>
+    <div class="cc-navicon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+  </div>
+
+  <main class="cc-main"><div class="cc-maininner">
+
+  <!-- ================= DETECT ================= -->
+  <section class="screen" id="s-detect">
+    <div class="cc-frame">
+      <div class="cc-titlerow"><span class="crumbs">Command Center connects into <b>Slack · #immunexis-launch-command</b></span><span class="tag">Live alert</span></div>
+      <div class="slack">
+        <div class="slack-side">
+          <div class="slack-ws">Makana Pharmaceuticals</div>
+          <div class="slack-sec">Channels</div>
+          <div class="slack-ch active"># immunexis-launch-command</div>
+          <div class="slack-ch">△ immunexis-patient-services</div>
+          <div class="slack-ch">△ immunexis-access-ops</div>
+          <div class="slack-sec">Apps</div>
+          <div class="slack-ch">✦ Launch Command Center</div>
+        </div>
+        <div class="slack-main">
+          <div class="slack-head">immunexis-launch-command <span class="hash">— cross-functional launch war room</span></div>
+          <div class="slack-body">
+            <div class="msg">
+              <div class="avatar bot">LC</div>
+              <div class="msg-body">
+                <div class="msg-name">Launch Command Center <span class="botpill">APP</span><span class="msg-time">9:14 AM</span></div>
+                <div class="msg-text">Post-approval progression is below the expected range for a mature, linked cohort.</div>
+                <div class="card danger">
+                  <h4>Signal — PA approved → paid claim</h4>
+                  <div class="stat-row">
+                    <div class="stat"><b>78%</b><span>Expected progression</span></div>
+                    <div class="stat"><b>64%</b><span>Observed progression</span></div>
+                    <div class="stat"><b>312</b><span>Patients potentially affected</span></div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat neutral"><b>90%</b><span>Linkage coverage</span></div>
+                    <div class="stat neutral"><b>6%</b><span>Outcomes unknown</span></div>
+                  </div>
+                  <a class="btn" href="#" onclick="return false">Open evidence packet →</a>
+                  <div class="minibadge">Ask a follow-up question, or open the Command Center</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">
+      <div class="lab">Data, controls & hand-off</div>
+      <p>Deterministic cohort, maturity, tolerance and materiality rules establish the signal. The agent summarizes the alert and supports natural-language questions. Source provenance, freshness, linkage coverage and unknown outcomes remain visible as Elena moves from Slack into the Command Center.</p>
+    </div>
+    <div class="sfchips">
+      <span class="sfchip">Data 360 — cohort, linkage, provenance</span>
+      <span class="sfchip">Agentforce — alert summary & Q&A</span>
+      <span class="sfchip">Slack — targeted alert</span>
+    </div>
+    <div class="caption">
+      <div class="lab">Third-party signals</div>
+      <p><b>Komodo Health</b> closed medical/pharmacy claims and prior-authorization status establish the approved, PA-cleared cohort. <b>IQVIA</b> longitudinal prescription data (written, filled, refill trends) sets the 78% expected-progression benchmark. <b>HealthVerity's</b> tokenized, de-identified patient-journey linkage delivers the 90% linkage coverage and keeps every figure in the alert cohort-level.</p>
+    </div>
+    <div class="sfchips">
+      <span class="sfchip vendor">Komodo Health — closed claims & PA status</span>
+      <span class="sfchip vendor">IQVIA — Rx written/filled/refill trends</span>
+      <span class="sfchip vendor">HealthVerity — tokenized cohort linkage</span>
+    </div>
+  </section>
+
+  <!-- ================= UNDERSTAND ================= -->
+  <section class="screen" id="s-understand">
+    <div class="cc-frame">
+      <div class="cc-titlerow"><span class="crumbs">Immunexis Launch Command Center <b>› Evidence Packet — PA-to-claim seam</b></span><span class="tag">Agentforce</span></div>
+      <div class="cc-body">
+          <div class="callout" style="margin-bottom:6px"><b>Hypothesis:</b> a routing-master error after a payer network change is sending approximately 18% of approved prescriptions to a specialty pharmacy outside the patient's payer network.</div>
+          <div class="panel-title">Progression, before vs. now</div>
+          <div class="kpi-grid">
+            <div class="kpi-tile"><div class="kv">79%</div><div class="kl">Prior</div></div>
+            <div class="kpi-tile"><div class="kv risk">65%</div><div class="kl">Now</div></div>
+            <div class="kpi-tile"><div class="kv risk">-14 pp</div><div class="kl">Gap</div></div>
+          </div>
+          <div class="panel-title">Root-cause test — correctly routed vs. out-of-network</div>
+          <div class="kpi-grid">
+            <div class="kpi-tile"><div class="kv good">79%</div><div class="kl">Correctly routed</div></div>
+            <div class="kpi-tile"><div class="kv risk">4%</div><div class="kl">Sent out-of-network</div></div>
+            <div class="kpi-tile"><div class="kv risk">-75 pp</div><div class="kl">Estimated difference</div></div>
+          </div>
+          <div class="panel-title">Confidence</div>
+          <div class="callout"><b>Hypothesis confidence: high.</b> The decline starts with the routing-master effective date; ~18% of the current cohort has an out-of-network pharmacy destination; correctly routed prescriptions retain prior performance. Illustrative 95% interval on the between-group effect: −79 to −71 points. Later transfer outcomes remain unknown for 6%.</div>
+      </div>
+    </div>
+    <div class="caption">
+      <div class="lab">Data, controls & hand-off</div>
+      <p>Deterministic analytics compare like-for-like cohorts and quantify the prior-to-now change. The statistical interval describes uncertainty in the estimated effect. The agent's hypothesis confidence ranks the explanatory evidence and stays labeled separately. Claims, prescription-routing events and effective-dated payer-network reference data support the test. Patient-level action still requires a subsequent review and authorization step.</p>
+    </div>
+    <div class="sfchips">
+      <span class="sfchip">Data 360 — cohort comparison</span>
+      <span class="sfchip">Agentforce — hypothesis test & evidence packet</span>
+    </div>
+    <div class="caption">
+      <div class="lab">Third-party signals</div>
+      <p><b>IQVIA</b> prescription-written and -filled trends quantify the prior-to-now change (79% → 65%). <b>Symphony Health</b> pharmacy claims and dispense/switch data confirm which specialty pharmacy actually filled — or failed to fill — each prescription. <b>Optum</b> formulary/PBM and effective-dated payer-network reference data surface the network change behind the routing-master hypothesis. <b>H1</b> provider-level prescribing and affiliation data identify which prescriber offices are concentrated in the misrouted, out-of-network segment.</p>
+    </div>
+    <div class="sfchips">
+      <span class="sfchip vendor">IQVIA — Rx written vs. filled trend</span>
+      <span class="sfchip vendor">Symphony Health — dispense / switch confirmation</span>
+      <span class="sfchip vendor">Optum — formulary / payer-network reference</span>
+      <span class="sfchip vendor">H1 — provider prescribing & affiliation data</span>
+    </div>
+  </section>
+
+  <!-- ================= ROUTE ================= -->
+  <section class="screen" id="s-route">
+    <div class="cc-frame">
+      <div class="cc-titlerow"><span class="crumbs">Immunexis Launch Command Center <b>› Decision Packet — DP-0142</b></span><span class="tag">Awaiting approval</span></div>
+      <div class="cc-body">
+          <div class="packet">
+            <div class="pcard owner"><div class="role">Decision owner</div><div class="who">Jordan Lee</div><div class="desc">Director of Access Operations</div></div>
+            <div class="pcard"><div class="role">Contributor</div><div class="who">Maya Patel</div><div class="desc">Specialty Pharmacy Partner Network Operations Lead — can confirm the specialty-pharmacy network change</div></div>
+            <div class="pcard"><div class="role">Contributor</div><div class="who">Chris Nguyen</div><div class="desc">Patient Services Analytics Lead — can validate the affected cohort and measurement logic</div></div>
+            <div class="pcard" style="grid-column:1/-1"><div class="role">Recommended next step</div><div class="desc" style="font-size:13.5px">Validate the effective-dated specialty-pharmacy routing master, quantify the affected segment and approve a controlled correction if confirmed.</div></div>
+          </div>
+          <div class="callout warn" style="margin-top:14px"><b>Elena confirms the cause and authorizes</b> the proposed cross-functional response before any work is assigned.</div>
+      </div>
+    </div>
+    <div class="caption">
+      <div class="lab">Data, controls & hand-off</div>
+      <p>Authority rules use role, market, product and issue type to recommend accountable owners. The agent prepares the decision packet within existing authority rules; Elena retains decision authority. Approval and rationale are recorded in Salesforce. External partner participation is limited to agreed contractual and data-sharing boundaries.</p>
+    </div>
+    <div class="sfchips">
+      <span class="sfchip">Agentforce — decision packet preparation</span>
+      <span class="sfchip">Salesforce — approval & rationale of record</span>
+    </div>
+    <div class="caption">
+      <div class="lab">Third-party signals</div>
+      <p>The decision packet carries the same evidence forward: <b>H1</b> provider-affiliation data narrows which prescriber offices Maya's partner-network team should engage, and <b>Optum's</b> payer-network reference confirms the specific contract at issue — so Jordan, Maya and Chris are reviewing the same cohort and sources Elena saw in Understand.</p>
+    </div>
+    <div class="sfchips">
+      <span class="sfchip vendor">H1 — affected-office identification</span>
+      <span class="sfchip vendor">Optum — payer contract reference</span>
+    </div>
+  </section>
+
+  <!-- ================= RESOLVE ================= -->
+  <section class="screen" id="s-resolve">
+    <div class="cc-frame">
+      <div class="cc-titlerow"><span class="crumbs">Immunexis Launch Command Center <b>› Resolution Case RC-0142</b></span><span class="tag">In progress</span></div>
+      <div class="cc-body">
+          <div class="actionlist">
+            <div class="action">
+              <div class="who">Jordan Lee<small>Access Operations</small></div>
+              <div class="desc">Confirms the effective-dated network rule and approves the controlled routing-master correction.</div>
+              <span class="status closed">Closed</span>
+            </div>
+            <div class="action">
+              <div class="who">Maya Patel<small>Specialty Pharmacy Partner</small></div>
+              <div class="desc">Validates the receiving pharmacy, cutover date and operational readiness through the agreed partner channel.</div>
+              <span class="status progress">In progress</span>
+            </div>
+            <div class="action">
+              <div class="who">Chris Nguyen<small>Patient Services Analytics</small></div>
+              <div class="desc">Identifies the permitted affected segment and establishes the comparison cohort for recovery measurement.</div>
+              <span class="status closed">Closed</span>
+            </div>
+            <div class="action">
+              <div class="who">Salesforce workflow<small>Platform</small></div>
+              <div class="desc">Creates tasks, records decisions, manages due dates and escalations, and preserves the evidence trail.</div>
+              <span class="status progress">Ongoing</span>
+            </div>
+          </div>
+      </div>
+    </div>
+    <div class="caption">
+      <div class="lab">Data, controls & hand-off</div>
+      <p>Flow or approved Agentforce actions create and update work only after Elena's authorization. MuleSoft or existing integration services may carry approved data and task updates. The decision log preserves who approved what, on which evidence and when. Tasks complete only within each team's decision rights.</p>
+    </div>
+    <div class="sfchips">
+      <span class="sfchip">Flow / Agentforce actions — authorized only</span>
+      <span class="sfchip">MuleSoft — integration & task updates</span>
+      <span class="sfchip">Salesforce workflow — case, tasks, decision log</span>
+    </div>
+    <div class="caption">
+      <div class="lab">Third-party signals</div>
+      <p><b>Symphony Health</b> dispense and cutover confirmation lets Maya verify the corrected routing is live at the receiving specialty pharmacy, while the same <b>Komodo Health</b> and <b>IQVIA</b> claims and prescription feeds used in Detect keep running underneath the case so Chris's comparison cohort stays current while resolution work is in progress.</p>
+    </div>
+    <div class="sfchips">
+      <span class="sfchip vendor">Symphony Health — cutover / dispense confirmation</span>
+      <span class="sfchip vendor">Komodo Health & IQVIA — ongoing cohort feed</span>
+    </div>
+  </section>
+
+  <!-- ================= VERIFY ================= -->
+  <section class="screen" id="s-verify">
+    <div class="cc-frame">
+      <div class="cc-titlerow"><span class="crumbs">Command Center posts the outcome back to <b>Slack · #immunexis-launch-command</b></span><span class="tag">Resolved</span></div>
+      <div class="slack">
+        <div class="slack-side">
+          <div class="slack-ws">Makana Pharmaceuticals</div>
+          <div class="slack-sec">Channels</div>
+          <div class="slack-ch active"># immunexis-launch-command</div>
+          <div class="slack-ch">△ immunexis-patient-services</div>
+          <div class="slack-ch">△ immunexis-access-ops</div>
+          <div class="slack-sec">Apps</div>
+          <div class="slack-ch">✦ Launch Command Center</div>
+        </div>
+        <div class="slack-main">
+          <div class="slack-head">immunexis-launch-command <span class="hash">— cross-functional launch war room</span></div>
+          <div class="slack-body">
+            <div class="msg">
+              <div class="avatar bot2">LC</div>
+              <div class="msg-body">
+                <div class="msg-name">Launch Command Center <span class="botpill">APP</span><span class="msg-time">Tue 8:40 AM</span></div>
+                <div class="msg-text">Resolution case RC-0142 — outcome verification against the next comparable cohort.</div>
+                <div class="card ok">
+                  <h4>Outcome verification — PA approved → paid claim</h4>
+                  <div class="stat-row">
+                    <div class="stat neutral"><b>65%</b><span>Pre-action</span></div>
+                    <div class="stat good"><b>72%</b><span>Post-action</span></div>
+                    <div class="stat good"><b>+7 pp</b><span>Observed recovery</span></div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat neutral"><b>91%</b><span>Linkage coverage</span></div>
+                    <div class="stat neutral"><b>95%</b><span>Mature follow-up</span></div>
+                    <div class="stat neutral"><b>5%</b><span>Outcomes unknown</span></div>
+                  </div>
+                  <a class="btn" href="#" onclick="return false">Open outcome evidence →</a>
+                  <div class="minibadge">Recovery observed · monitoring stays open until threshold &amp; recurrence window are met</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">
+      <div class="lab">Data, controls & hand-off</div>
+      <p>Comparable-cohort logic is defined before the intervention and version controlled. Action completion and pathway recovery are shown as separate states. Attribution strength and remaining unknowns are reported explicitly. Elena decides whether to close, continue monitoring or reopen the resolution case.</p>
+    </div>
+    <div class="sfchips">
+      <span class="sfchip">Data 360 — comparable-cohort measurement</span>
+      <span class="sfchip">Agentforce — recovery summary</span>
+      <span class="sfchip">Slack — outcome notification</span>
+    </div>
+    <div class="caption">
+      <div class="lab">Third-party signals</div>
+      <p>Recovery is measured against the same lineage used to detect the issue: <b>Komodo Health</b> closed claims and PA status, <b>IQVIA</b> longitudinal Rx trends, <b>Symphony Health</b> dispense confirmation and <b>HealthVerity</b> tokenized linkage — the source of the 91% linkage coverage and 95% mature follow-up figures above.</p>
+    </div>
+    <div class="sfchips">
+      <span class="sfchip vendor">Komodo Health — closed claims & PA status</span>
+      <span class="sfchip vendor">IQVIA — longitudinal Rx trends</span>
+      <span class="sfchip vendor">Symphony Health — dispense confirmation</span>
+      <span class="sfchip vendor">HealthVerity — tokenized cohort linkage</span>
+    </div>
+  </section>
+
+  <p class="foot">Fictional persona, company and figures for discussion purposes only · UI restyled to match the Life Sciences Cloud Command Center prototype · reflects the 4 Sep 2026 Patient-Ready Launch validation workbench</p>
+  </div></main>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.story-tab');
+  const screens = document.querySelectorAll('.screen');
+  function show(id){
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+    screens.forEach(s => s.classList.toggle('active', s.id === 's-'+id));
+  }
+  tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+  show('detect');
+</script>
+</body>
+</html>
